@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>碳循环饮食精细化计算器 · 秦浩教练</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --jp: #8B5CF6;       /* Joker Purple */
+            --jp-dim: rgba(139,92,246,0.15);
+            --jp-mid: rgba(139,92,246,0.35);
+            --jp-glow: rgba(139,92,246,0.6);
+            --tg: #22C55E;       /* Tactical Green */
+            --tg-dim: rgba(34,197,94,0.12);
+            --tg-mid: rgba(34,197,94,0.3);
+            --ds: #0C0C0C;       /* Deep Space */
+            --card: #161b22;    /* Card background */
+            --grid: #30363d;    /* Grid line */
+            --border: rgba(48,54,61,0.6);
+            --text: #e0e0e0;
+            --text-dim: #8b949e;
+            --text-faint: #484f58;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--ds);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(139,92,246,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34,197,94,0.04) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 32px 20px 24px;
+            background: linear-gradient(180deg, rgba(139,92,246,0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 39px,
+                rgba(48,54,61,0.15) 39px,
+                rgba(48,54,61,0.15) 40px
+            ), repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 39px,
+                rgba(48,54,61,0.15) 39px,
+                rgba(48,54,61,0.15) 40px
+            );
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .header .brand-tag {
+            font-family: 'Archivo Black', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 1.3em;
+            letter-spacing: 4px;
+            color: var(--jp);
+            text-transform: none;
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+        .header h1 {
+            font-family: 'Archivo Black', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 1.5em;
+            color: var(--text);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+        .header .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--tg-dim);
+            color: var(--tg);
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 0.72em;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid var(--tg-mid);
+            letter-spacing: 0.5px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            font-family: 'Archivo Black', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        .card-title .icon { font-size: 1.1em; }
+        .card-title .section-num {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.72em;
+            color: var(--jp);
+            font-weight: 700;
+            margin-left: auto;
+            opacity: 0.6;
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-size: 0.88em;
+            color: #aaa;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group label .hint {
+            float: right;
+            color: #666;
+            font-weight: 400;
+            font-size: 0.9em;
+        }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.25);
+            color: #fff;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+        }
+        input[type="number"]:focus, select:focus {
+            border-color: var(--jp);
+            box-shadow: 0 0 0 2px var(--jp-dim);
+        }
+        select { cursor: pointer; }
+
+        /* Gender toggle */
+        .gender-toggle {
+            display: flex;
+            gap: 8px;
+        }
+        .gender-toggle button {
+            flex: 1;
+            padding: 11px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.25);
+            color: #888;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .gender-toggle button.active {
+            background: var(--jp-dim);
+            color: var(--jp);
+            border-color: var(--jp-mid);
+            font-weight: 600;
+        }
+
+        /* Goal cards */
+        .goal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .goal-option {
+            padding: 12px 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .goal-option.active {
+            border-color: var(--jp);
+            background: var(--jp-dim);
+        }
+        .goal-option .goal-name { font-weight: 600; font-size: 0.92em; color: var(--text); }
+        .goal-option .goal-desc { font-size: 0.75em; color: var(--text-dim); margin-top: 3px; }
+        .goal-option .goal-value { font-size: 0.72em; color: var(--tg); margin-top: 4px; font-weight: 600; }
+        .goal-option.active .goal-name { color: var(--jp); }
+
+        /* Activity options */
+        .activity-options { display: flex; flex-direction: column; gap: 6px; }
+        .activity-option {
+            padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .activity-option.active {
+            border-color: var(--tg);
+            background: var(--tg-dim);
+        }
+        .activity-option .act-name { font-size: 0.88em; color: var(--text-dim); }
+        .activity-option .act-value { font-size: 0.82em; color: var(--tg); font-weight: 600; }
+        .activity-option.active .act-name { color: var(--tg); font-weight: 500; }
+
+        /* Calculate button */
+        .calc-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 6px;
+            background: var(--jp);
+            color: #fff;
+            font-family: 'Archivo Black', 'PingFang SC', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+            margin-top: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .calc-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: btnSweep 3s infinite;
+        }
+        @keyframes btnSweep {
+            0% { left: -100%; }
+            50%,100% { left: 100%; }
+        }
+        .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--jp-mid); }
+        .calc-btn:active { transform: scale(0.98); }
+
+        /* Results */
+        .results { display: none; }
+        .results.show { display: block; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .result-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            padding: 14px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .result-item.full-width { grid-column: span 2; }
+        .result-item .label {
+            font-size: 0.72em;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .result-item .value {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--tg);
+        }
+        .result-item .unit { font-size: 0.72em; color: var(--text-faint); margin-left: 2px; }
+        .result-item.highlight .value { color: var(--jp); }
+        .result-item.warm .value { color: var(--tg); }
+
+        /* Cycle section */
+        .cycle-tabs { display: flex; gap: 0; margin-bottom: 14px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+        .cycle-tab {
+            flex: 1;
+            padding: 10px 6px;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-faint);
+            font-size: 0.82em;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-weight: 600;
+        }
+        .cycle-tab.active-high { background: var(--jp); color: #fff; }
+        .cycle-tab.active-mid { background: var(--tg); color: #0C0C0C; }
+        .cycle-tab.active-low { background: var(--grid); color: var(--text-dim); }
+
+        .cycle-detail {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+        .cycle-detail h4 {
+            font-size: 0.92em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cycle-detail .macro-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.86em;
+        }
+        .cycle-detail .macro-row:last-child { border: none; }
+        .cycle-detail .macro-name { color: #aaa; }
+        .cycle-detail .macro-val { font-weight: 700; }
+        .cycle-detail .macro-val.protein { color: var(--jp); }
+        .cycle-detail .macro-val.fat { color: var(--tg); }
+        .cycle-detail .macro-val.carb { color: var(--text); }
+        .cycle-detail .total-kcal {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            font-weight: 700;
+        }
+        .cycle-detail .usage { font-size: 0.78em; color: #888; margin-top: 6px; line-height: 1.5; }
+
+        /* Education section */
+        .edu-section { margin-top: 8px; }
+        .edu-item {
+            background: rgba(0,0,0,0.18);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid #555;
+        }
+        .edu-item.protein { border-left-color: var(--jp); }
+        .edu-item.fat { border-left-color: var(--tg); }
+        .edu-item.bmr { border-left-color: var(--tg); }
+        .edu-item.tdee { border-left-color: var(--jp); }
+        .edu-item.carb { border-left-color: var(--grid); }
+        .edu-item h4 {
+            font-size: 0.9em;
+            margin-bottom: 6px;
+            color: #ddd;
+        }
+        .edu-item p, .edu-item li {
+            font-size: 0.82em;
+            color: #999;
+            line-height: 1.65;
+        }
+        .edu-item ul { padding-left: 16px; margin-top: 4px; }
+        .formula-box {
+            background: rgba(0,0,0,0.4);
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin: 8px 0;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.84em;
+            color: var(--tg);
+            overflow-x: auto;
+            text-align: center;
+            border: 1px solid var(--tg-mid);
+        }
+
+        /* Food guide */
+        .food-table { width: 100%; border-collapse: collapse; font-size: 0.82em; margin-top: 8px; }
+        .food-table th {
+            background: rgba(255,255,255,0.06);
+            padding: 8px 6px;
+            text-align: left;
+            color: #aaa;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .food-table td {
+            padding: 7px 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #bbb;
+        }
+        .food-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .food-table .kcal { color: var(--tg); font-weight: 600; text-align: right; }
+        .food-cat { font-weight: 600; color: #fff; background: rgba(255,255,255,0.03); }
+
+        /* Sample plan */
+        .sample-plan {
+            background: rgba(0,0,0,0.22);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+        .meal {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .meal:last-child { border: none; }
+        .meal-time {
+            min-width: 56px;
+            font-weight: 700;
+            font-size: 0.82em;
+            color: var(--jp);
+            padding-top: 2px;
+        }
+        .meal-food { font-size: 0.83em; color: #bbb; line-height: 1.5; flex: 1; }
+        .meal-macro {
+            font-size: 0.72em;
+            color: #777;
+            margin-top: 4px;
+        }
+        .meal-macro span { margin-right: 8px; }
+        .meal-macro .p { color: var(--jp); }
+        .meal-macro .f { color: var(--tg); }
+        .meal-macro .c { color: var(--text-dim); }
+
+        /* Accordion */
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 4px 0;
+            user-select: none;
+        }
+        .accordion-header::after {
+            content: '▾';
+            font-size: 0.7em;
+            color: var(--text-faint);
+            transition: transform 0.3s;
+        }
+        .accordion-header.open::after { transform: rotate(180deg); }
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .accordion-body.open { max-height: 3000px; }
+
+        /* Tips box */
+        .tip-box {
+            background: rgba(139,92,246,0.06);
+            border: 1px solid var(--jp-mid);
+            border-radius: 6px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+        .tip-box h4 { font-size: 0.88em; color: var(--jp); margin-bottom: 6px; }
+        .tip-box p, .tip-box li { font-size: 0.81em; color: var(--text-dim); line-height: 1.6; }
+        .tip-box ul { padding-left: 16px; margin-top: 4px; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #444;
+            font-size: 0.75em;
+        }
+        .footer a { color: #666; }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .container { padding: 10px; }
+            .card { padding: 16px; }
+            .header h1 { font-size: 1.35em; }
+            .result-grid { grid-template-columns: 1fr; }
+            .result-item.full-width { grid-column: span 1; }
+            .goal-options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="brand-tag">秦浩教练</div>
+    <h1>碳循环饮食精细化计算器</h1>
+    <p class="subtitle">CARBON CYCLING DIET CALCULATOR</p>
+    <span class="badge">⚡ 老秦百日身材蜕变 · 方法精简版</span>
+</div>
+
+<div class="container">
+
+<!-- ========== 输入区域 ========== -->
+<div class="card" id="inputCard">
+    <div class="card-title"><span class="icon">⟐</span> 参数输入 <span class="section-num">SEC.01</span></div>
+
+    <!-- 性别 -->
+    <div class="form-group">
+        <label>性别</label>
+        <div class="gender-toggle">
+            <button id="btnMale" class="active" onclick="setGender('male')">👨 男性</button>
+            <button id="btnFemale" onclick="setGender('female')">👩 女性</button>
+        </div>
+    </div>
+
+    <!-- 年龄/身高 -->
+    <div class="form-row">
+        <div class="form-group">
+            <label>年龄（岁）</label>
+            <input type="number" id="age" placeholder="例：30" value="30" min="10" max="100">
+        </div>
+        <div class="form-group">
+            <label>身高（cm）</label>
+            <input type="number" id="height" placeholder="例：175" value="175" min="100" max="250">
+        </div>
+    </div>
+
+    <!-- 体重 -->
+    <div class="form-group">
+        <label>体重（kg）</label>
+        <input type="number" id="weight" placeholder="例：85" value="85" step="0.1" min="30" max="300">
+    </div>
+
+    <!-- 目标选择 -->
+    <div class="form-group">
+        <label>训练目标 <span class="hint">自动设定蛋白/脂肪系数</span></label>
+        <div class="goal-options">
+            <div class="goal-option active" data-protein="2.4" data-fat="1.0" onclick="selectGoal(this)">
+                <div class="goal-name">💪 常规备赛/减脂</div>
+                <div class="goal-desc">综合保肌、代谢、肾脏压力首选</div>
+                <div class="goal-value">蛋白 2.4g/kg | 脂肪 1.0g/kg</div>
+            </div>
+            <div class="goal-option" data-protein="2.9" data-fat="0.8" onclick="selectGoal(this)">
+                <div class="goal-name">🏆 低体脂/赛前冲刺</div>
+                <div class="goal-desc">极致抗分解，控水控形态</div>
+                <div class="goal-value">蛋白 2.9g/kg | 脂肪 0.8g/kg</div>
+            </div>
+            <div class="goal-option" data-protein="2.2" data-fat="1.0" onclick="selectGoal(this)">
+                <div class="goal-name">😌 非赛季维持</div>
+                <div class="goal-desc">维持期，适度盈余热量</div>
+                <div class="goal-value">蛋白 2.2g/kg | 脂肪 1.0g/kg</div>
+            </div>
+            <div class="goal-option" data-protein="1.7" data-fat="1.0" onclick="selectGoal(this)">
+                <div class="goal-name">🚶 普通人群</div>
+                <div class="goal-desc">日常健康塑形需求</div>
+                <div class="goal-value">蛋白 1.7g/kg | 脂肪 1.0g/kg</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动水平 -->
+    <div class="form-group">
+        <label>每周运动频率</label>
+        <div class="activity-options">
+            <div class="activity-option" data-val="1.2" onclick="selectActivity(this)">
+                <span class="act-name">1️⃣ 久坐，几乎不运动</span><span class="act-value">1.2</span>
+            </div>
+            <div class="activity-option" data-val="1.375" onclick="selectActivity(this)">
+                <span class="act-name">2️⃣ 每周1~3次轻训练</span><span class="act-value">1.375</span>
+            </div>
+            <div class="activity-option active" data-val="1.55" onclick="selectActivity(this)">
+                <span class="act-name">3️⃣ 每周4~6次抗阻训练</span><span class="act-value">1.55</span>
+            </div>
+            <div class="activity-option" data-val="1.75" onclick="selectActivity(this)">
+                <span class="act-name">4️⃣ 每天/一天两练（备赛）</span><span class="act-value">1.75</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">EXECUTE ▸ 计算启动</button>
+</div>
+
+
+<!-- ========== 结果展示 ========== -->
+<div class="results card" id="resultsCard">
+    <div class="card-title"><span class="icon">◈</span> 数据输出 <span class="section-num">SEC.02</span></div>
+
+    <div class="result-grid">
+        <div class="result-item">
+            <div class="label">每日蛋白质</div>
+            <div class="value" id="resProtein">--</div><span class="unit">g</span>
+        </div>
+        <div class="result-item">
+            <div class="label">每日脂肪</div>
+            <div class="value warm" id="resFat">--</div><span class="unit">g</span>
+        </div>
+        <div class="result-item">
+            <div class="label">基础代谢 BMR</div>
+            <div class="value" id="resBMR">--</div><span class="unit">kcal</span>
+        </div>
+        <div class="result-item highlight">
+            <div class="label">每日总消耗 TDEE</div>
+            <div class="value" id="resTDEE">--</div><span class="unit">kcal</span>
+        </div>
+        <div class="result-item full-width">
+            <div class="label">碳水热量（高碳日）</div>
+            <div class="value" id="resCarbCal">--</div><span class="unit">kcal</span>
+        </div>
+        <div class="result-item full-width highlight">
+            <div class="label">🎯 碳水摄入量（高碳日）</div>
+            <div class="value" id="resCarb">--</div><span class="unit">g</span>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========== 碳循环方案 ========== -->
+<div class="results card" id="cycleCard">
+    <div class="card-title"><span class="icon">⟳</span> 碳循环方案 <span class="section-num">SEC.03</span></div>
+
+    <!-- 三档循环 -->
+    <div style="margin-bottom: 20px;">
+        <h4 style="font-size:0.92em;color:var(--text);margin-bottom:10px;">◈ 方案A：三档循环（健美主流）</h4>
+        <p style="font-size:0.8em;color:var(--text-dim);margin-bottom:10px;">适合：常规训练人群 · 大肌群日→常规训练日→有氧/休息日</p>
+        <div class="cycle-tabs">
+            <button class="cycle-tab active-high" onclick="showCycle('high', this)">🔥 高碳日</button>
+            <button class="cycle-tab active-mid" onclick="showCycle('mid', this)">⚡ 中碳日</button>
+            <button class="cycle-tab active-low" onclick="showCycle('low', this)">❄️ 低碳日</button>
+        </div>
+        <div id="cycleHigh" class="cycle-detail">
+            <h4>🔥 高碳日 — 大肌群/高强度训练日</h4>
+            <div class="macro-row"><span class="macro-name">蛋白质</span><span class="macro-val protein" id="cProtein">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">脂肪</span><span class="macro-val fat" id="cFat">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">碳水化合物</span><span class="macro-val carb" id="cCarbHigh">-- g（100%）</span></div>
+            <div class="total-kcal"><span>总热量</span><span id="cKcalHigh">-- kcal</span></div>
+            <div class="usage">💡 用途：腿部、背部等大肌群训练日。充足糖原储备支持高强度输出，促进合成代谢。</div>
+        </div>
+        <div id="cycleMid" class="cycle-detail" style="display:none;">
+            <h4>⚡ 中碳日 — 常规抗阻训练日</h4>
+            <div class="macro-row"><span class="macro-name">蛋白质</span><span class="macro-val protein" id="cProteinM">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">脂肪</span><span class="macro-val fat" id="cFatM">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">碳水化合物</span><span class="macro-val carb" id="cCarbMid">-- g（~60%）</span></div>
+            <div class="total-kcal"><span>总热量</span><span id="cKcalMid">-- kcal</span></div>
+            <div class="usage">💡 用途：肩、臂、中小肌群训练日。中等碳水维持训练表现，同时制造温和热量缺口。</div>
+        </div>
+        <div id="cycleLow" class="cycle-detail" style="display:none;">
+            <h4>❄️ 低碳日 — 有氧/休息/主动恢复日</h4>
+            <div class="macro-row"><span class="macro-name">蛋白质</span><span class="macro-val protein" id="cProteinL">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">脂肪</span><span class="macro-val fat" id="cFatL">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">碳水化合物</span><span class="macro-val carb" id="cCarbLow">-- g（~30%）</span></div>
+            <div class="total-kcal"><span>总热量</span><span id="cKcalLow">-- kcal</span></div>
+            <div class="usage">💡 用途：有氧日、休息日或主动恢复日。低碳水加速脂肪氧化，提升胰岛素敏感性。</div>
+        </div>
+    </div>
+
+    <!-- 两档循环 -->
+    <div>
+        <h4 style="font-size:0.92em;color:var(--text);margin-bottom:10px;">◈ 方案B：两档循环（简单易操作）</h4>
+        <p style="font-size:0.8em;color:var(--text-dim);margin-bottom:10px;">适合：体质敏感、皮质醇偏高人群 · 高碳/低碳交替</p>
+        <div class="cycle-tabs">
+            <button class="cycle-tab active-high" onclick="showCycle2('high', this)">🔥 高碳日</button>
+            <button class="cycle-tab active-low" onclick="showCycle2('low', this)">❄️ 低碳日</button>
+        </div>
+        <div id="cycle2High" class="cycle-detail">
+            <h4>🔥 高碳日 — 训练日</h4>
+            <div class="macro-row"><span class="macro-name">蛋白质</span><span class="macro-val protein" id="c2ProteinH">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">脂肪</span><span class="macro-val fat" id="c2FatH">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">碳水化合物</span><span class="macro-val carb" id="c2CarbH">-- g（100%）</span></div>
+            <div class="total-kcal"><span>总热量</span><span id="c2KcalH">-- kcal</span></div>
+            <div class="usage">💡 所有抗阻训练日均采用高碳配比。</div>
+        </div>
+        <div id="cycle2Low" class="cycle-detail" style="display:none;">
+            <h4>❄️ 低碳日 — 非训练/有氧日</h4>
+            <div class="macro-row"><span class="macro-name">蛋白质</span><span class="macro-val protein" id="c2ProteinL">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">脂肪</span><span class="macro-val fat" id="c2FatL">-- g</span></div>
+            <div class="macro-row"><span class="macro-name">碳水化合物</span><span class="macro-val carb" id="c2CarbL">-- g（~35%）</span></div>
+            <div class="total-kcal"><span>总热量</span><span id="c2KcalL">-- kcal</span></div>
+            <div class="usage">💡 休息日或有氧日采用低碳配比，最大化脂肪燃烧。</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========== 教育区：计算原理 ========== -->
+<div class="results card edu-section" id="eduCard">
+    <div class="card-title accordion-header" onclick="toggleAccordion(this)">
+        <span><span class="icon">⊘</span> 计算原理</span>
+        <span class="section-num">SEC.04</span>
+    </div>
+    <div class="accordion-body">
+
+        <div class="edu-item bmr">
+            <h4>🧮 ① BMR 基础代谢率</h4>
+            <p>BMR是你躺着不动一整天身体消耗的热量，用于维持心跳、呼吸、体温等基本生命活动。</p>
+            <div class="formula-box" id="formulaBMR"></div>
+            <ul>
+                <li>这是<strong>Mifflin-St Jeor公式</strong>，目前公认最准确的BMR计算方式之一</li>
+                <li>健美/力量人群主流使用此公式</li>
+                <li>男性比女性多+166kcal（因肌肉量和激素差异）</li>
+            </ul>
+        </div>
+
+        <div class="edu-item tdee">
+            <h4>🔥 ② TDEE 每日总消耗</h4>
+            <p>TDEE = BMR × 活动系数，代表你一天实际消耗的总热量（含运动、工作、日常活动）。</p>
+            <div class="formula-box">TDEE = BMR × 活动系数</div>
+            <ul>
+                <li><strong>1.2</strong> = 久坐办公族，几乎不运动</li>
+                <li><strong>1.375</strong> = 每周1-3次轻度运动（散步、瑜伽）</li>
+                <li><strong>1.55</strong> = 每周4-6次抗阻训练（大多数健身者）</li>
+                <li><strong>1.75</strong> = 高强度/一天两练（备赛期常用）</li>
+            </ul>
+        </div>
+
+        <div class="edu-item protein">
+            <h4>🥩 ③ 蛋白质计算</h4>
+            <p>蛋白质是碳循环中<strong>第一常量</strong>——全周期所有档位（高/中/低碳）克数完全不变！</p>
+            <div class="formula-box">每日蛋白(g) = 体重(kg) × 蛋白系数</div>
+            <ul>
+                <li><strong>2.4g/kg</strong> — 常规备赛/减脂首选（平衡保肌与肾脏压力）</li>
+                <li><strong>2.8~3.0g/kg</strong> — 赛前极致抗分解冲刺</li>
+                <li><strong>2.2g/kg</strong> — 非赛季维持期</li>
+                <li><strong>1.6~1.8g/kg</strong> — 普通人群日常塑形</li>
+            </ul>
+            <p style="margin-top:6px;">💡 参考值：<strong>200g蛋白</strong> ≈ 鸡蛋(1全蛋+4蛋白) + 蛋白粉30g + 纯瘦肉700g</p>
+        </div>
+
+        <div class="edu-item fat">
+            <h4>🥑 ④ 脂肪计算</h4>
+            <p>脂肪是<strong>第二常量</strong>——全天克数同样固定不变，用于维持性激素水平和生理机能。</p>
+            <div class="formula-box">每日脂肪(g) = 体重(kg) × 脂肪系数</div>
+            <ul>
+                <li><strong>1.0g/kg</strong> — 全周期通用（平衡睾酮/皮质醇，不易储水）</li>
+                <li><strong>0.8g/kg</strong> — 赛前控水/控形态（减少皮下积水）</li>
+                <li><strong>1.2g/kg</strong> — 激素偏弱/压力大人群（提升性激素）</li>
+            </ul>
+            <p style="margin-top:6px;">💡 参考值：<strong>50g脂肪</strong> ≈ 橄榄油20g + 坚果30g + 无糖酸奶200g + 鱼油5g + 肉类自带脂肪约30g</p>
+        </div>
+
+        <div class="edu-item carb">
+            <h4>🍚 ⑤ 碳水化合物（唯一变量！）</h4>
+            <p>碳水是碳循环的<strong>核心变量</strong>——用碳水承接每日热量差值，实现热量调控与糖原管理。</p>
+            <div class="formula-box">碳水热量 = TDEE − (蛋白g × 4) − (脂肪g × 9)<br>碳水(g) = 碳水热量 ÷ 4</div>
+            <ul>
+                <li>蛋白每克 <strong>4kcal</strong>，脂肪每克 <strong>9kcal</strong>，碳水每克 <strong>4kcal</strong></li>
+                <li>先固定蛋白和脂肪的热量占比，<strong>剩余热量全部给碳水</strong></li>
+                <li>通过调整碳水摄入量来控制总热量，实现"高/中/低碳"切换</li>
+            </ul>
+            <p style="margin-top:6px;">💡 参考值：<strong>380g碳水</strong> ≈ 燕麦片50g(40g碳水) + 煮薯类500g(100g) + 米饭800g(200g) + 水果一份(40g)</p>
+        </div>
+
+        <div class="tip-box">
+            <h4>⚡ 碳循环核心规则总结</h4>
+            <ul>
+                <li><strong>蛋白质</strong> → 全周期固定不变，优先保肌，第一常量</li>
+                <li><strong>脂肪</strong> → 全周期固定不变，维持激素，第二常量</li>
+                <li><strong>碳水</strong> → 唯一变量，承接热量差值，实现热量与糖原双重调控</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========== 食谱设计指南 ========== -->
+<div class="results card" id="foodCard">
+    <div class="card-title accordion-header" onclick="toggleAccordion(this)">
+        <span><span class="icon">⬡</span> 食谱设计指南</span>
+        <span class="section-num">SEC.05</span>
+    </div>
+    <div class="accordion-body">
+
+        <div class="tip-box">
+            <h4>💡 食谱设计三步法</h4>
+            <ol style="font-size:0.82em;color:#bbb;line-height:1.7;padding-left:18px;">
+                <li><strong>先安排蛋白质</strong> — 把全天蛋白目标分配到每一餐（建议4-6餐，每餐25-45g）</li>
+                <li><strong>再安排脂肪</strong> — 通过烹饪油、坚果、蛋黄、奶制品分配脂肪</li>
+                <li><strong>最后用碳水填满剩余热量</strong> — 训练日前后的餐多放碳水，休息日晚餐少放</li>
+            </ol>
+        </div>
+
+        <h4 style="font-size:0.9em;color:var(--text);margin:14px 0 8px;">◈ 常见食物热量参考表</h4>
+        <table class="food-table">
+            <tr><th>食物</th><th>份量</th><th>热量(kcal)</th></tr>
+            <tr class="food-cat"><td colspan="3" style="color:var(--jp);">⟐ 蛋白质来源</td></tr>
+            <tr><td>鸡胸肉</td><td>100g</td><td class="kcal">115</td></tr>
+            <tr><td>瘦牛肉</td><td>100g</td><td class="kcal">150</td></tr>
+            <tr><td>鸡蛋（全蛋）</td><td>1个（约50g）</td><td class="kcal">70~80</td></tr>
+            <tr><td>蛋清</td><td>1个（约30g）</td><td class="kcal">15</td></tr>
+            <tr><td>蛋白粉（乳清）</td><td>30g（一勺）</td><td class="kcal">120</td></tr>
+            <tr><td>三文鱼</td><td>100g</td><td class="kcal">208</td></tr>
+            <tr class="food-cat"><td colspan="3" style="color:var(--tg);">⟐ 脂肪来源</td></tr>
+            <tr><td>橄榄油</td><td>10g（约1汤匙）</td><td class="kcal">90</td></tr>
+            <tr><td>混合坚果</td><td>25g（一小把）</td><td class="kcal">135~160</td></tr>
+            <tr><td>牛油果</td><td>半个（约75g）</td><td class="kcal">120</td></tr>
+            <tr><td>蛋黄</td><td>1个</td><td class="kcal">55</td></tr>
+            <tr><td>无糖酸奶（希腊）</td><td>200g（1盒）</td><td class="kcal">100~180</td></tr>
+            <tr><td>鱼油胶囊</td><td>5g</td><td class="kcal">45</td></tr>
+            <tr class="food-cat"><td colspan="3" style="color:var(--text-dim);">⟐ 碳水来源</td></tr>
+            <tr><td>米饭（熟重）</td><td>100g（约小半碗）</td><td class="kcal">116</td></tr>
+            <tr><td>燕麦片（干重）</td><td>50g</td><td class="kcal">170~190</td></tr>
+            <tr><td>红薯/紫薯（煮）</td><td>100g</td><td class="kcal">75~86</td></tr>
+            <tr><td>土豆（煮）</td><td>100g</td><td class="kcal">77</td></tr>
+            <tr><td>全麦面包</td><td>1片（约35g）</td><td class="kcal">80~95</td></tr>
+            <tr><td>香蕉</td><td>1根（约120g）</td><td class="kcal">105</td></tr>
+            <tr><td>蓝莓</td><td>1盒（200g）</td><td class="kcal">114~140</td></tr>
+            <tr class="food-cat"><td colspan="3" style="color:var(--text-faint);">⟐ 蔬菜（几乎免费）</td></tr>
+            <tr><td>绿叶蔬菜</td><td>250g</td><td class="kcal">40~60</td></tr>
+            <tr><td>西兰花</td><td>200g</td><td class="kcal">68</td></tr>
+            <tr><td>黄瓜/番茄</td><td>200g</td><td class="kcal">32~36</td></tr>
+        </table>
+
+        <h4 style="font-size:0.9em;color:var(--text);margin:16px 0 8px;">◈ 高碳日参考食谱示例</h4>
+        <div class="sample-plan" id="samplePlanHigh">
+            <p style="font-size:0.8em;color:#888;margin-bottom:8px;" id="planNoteHigh">以下为基于你数据的估算示例，请按实际调整：</p>
+            <!-- JS动态生成 -->
+        </div>
+
+        <h4 style="font-size:0.9em;color:var(--text);margin:16px 0 8px;">◈ 低碳日参考食谱示例</h4>
+        <div class="sample-plan" id="samplePlanLow">
+            <p style="font-size:0.8em;color:#888;margin-bottom:8px;" id="planNoteLow">低碳日大幅减少碳水，增加健康脂肪和蔬菜：</p>
+            <!-- JS动态生成 -->
+        </div>
+
+        <div class="tip-box" style="margin-top:14px;">
+            <h4>🎯 实操要点</h4>
+            <ul>
+                <li><strong>训练前后是关键窗口</strong> — 训练前2小时和训练后1小时内多安排碳水</li>
+                <li><strong>蛋白质要分散</strong> — 每3-4小时吃一次蛋白，不要一顿塞完</li>
+                <li><strong>蔬菜随便吃</strong> — 绿叶蔬菜热量极低，可以大量食用增加饱腹感</li>
+                <li><strong>喝水！喝水！</strong> — 每天至少3-4升水，尤其是高蛋白饮食期间</li>
+                <li><strong>前两周适应期</strong> — 切换到碳循环后身体需要时间适应，坚持2周再看效果</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<div class="footer">
+    <p style="color:var(--jp);font-family:'Archivo Black','PingFang SC',sans-serif;letter-spacing:2px;font-size:0.72em;">秦浩教练</p>
+    <p style="margin-top:4px;color:var(--text-dim);font-size:0.78em;">📞 13265472891 &nbsp;|&nbsp; 微信: qh13265472891</p>
+    <p style="margin-top:6px;color:var(--text-faint);font-size:0.72em;">碳循环饮食精细化计算器 · 仅供学习参考，不构成医疗建议</p>
+</div>
+
+<script>
+// ===== 状态 =====
+let currentGender = 'male';
+let currentProteinCoef = 2.4;
+let currentFatCoef = 1.0;
+let currentActivityCoef = 1.55;
+
+// ===== 性别选择 =====
+function setGender(g) {
+    currentGender = g;
+    document.getElementById('btnMale').className = g === 'male' ? 'active' : '';
+    document.getElementById('btnFemale').className = g === 'female' ? 'active' : '';
+}
+
+// ===== 目标选择 =====
+function selectGoal(el) {
+    document.querySelectorAll('.goal-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    currentProteinCoef = parseFloat(el.dataset.protein);
+    currentFatCoef = parseFloat(el.dataset.fat);
+}
+
+// ===== 活动水平选择 =====
+function selectActivity(el) {
+    document.querySelectorAll('.activity-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    currentActivityCoef = parseFloat(el.dataset.val);
+}
+
+// ===== 切换碳循环档位 =====
+function showCycle(level, btn) {
+    // tabs
+    btn.parentElement.querySelectorAll('.cycle-tab').forEach(t => {
+        t.className = 'cycle-tab';
+    });
+    btn.className = 'cycle-tab active-' + level;
+    // details
+    document.getElementById('cycleHigh').style.display = level === 'high' ? '' : 'none';
+    document.getElementById('cycleMid').style.display = level === 'mid' ? '' : 'none';
+    document.getElementById('cycleLow').style.display = level === 'low' ? '' : 'none';
+}
+function showCycle2(level, btn) {
+    btn.parentElement.querySelectorAll('.cycle-tab').forEach(t => {
+        t.className = 'cycle-tab';
+    });
+    btn.className = 'cycle-tab active-' + level;
+    document.getElementById('cycle2High').style.display = level === 'high' ? '' : 'none';
+    document.getElementById('cycle2Low').style.display = level === 'low' ? '' : 'none';
+}
+
+// ===== 手风琴展开/收起 =====
+function toggleAccordion(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+}
+
+// ===== 核心计算 =====
+function calculate() {
+    const age = parseFloat(document.getElementById('age').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+
+    // 校验
+    if (!age || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
+        alert('⚠️ 请完整填写年龄、身高和体重！');
+        return;
+    }
+
+    // 1. BMR (Mifflin-St Jeor)
+    let bmr = 10 * weight + 6.25 * height - 5 * age;
+    bmr += (currentGender === 'male') ? 5 : -161;
+
+    // 2. TDEE
+    const tdee = bmr * currentActivityCoef;
+
+    // 3. 蛋白质
+    const protein = weight * currentProteinCoef;
+
+    // 4. 脂肪
+    const fat = weight * currentFatCoef;
+
+    // 5. 碳水热量 & 克数（高碳日 = TDEE）
+    const carbCal = tdee - (protein * 4) - (fat * 9);
+    const carb = carbCal / 4;
+
+    // 显示结果
+    document.getElementById('resProtein').textContent = protein.toFixed(1);
+    document.getElementById('resFat').textContent = fat.toFixed(1);
+    document.getElementById('resBMR').textContent = bmr.toFixed(1);
+    document.getElementById('resTDEE').textContent = tdee.toFixed(1);
+    document.getElementById('resCarbCal').textContent = Math.round(carbCal);
+    document.getElementById('resCarb').textContent = carb.toFixed(1);
+
+    // 三档循环
+    const carbMid = carb * 0.6;
+    const carbLow = carb * 0.3;
+    const kcalHigh = protein * 4 + fat * 9 + carb * 4;
+    const kcalMid = protein * 4 + fat * 9 + carbMid * 4;
+    const kcalLow = protein * 4 + fat * 9 + carbLow * 4;
+
+    // 三档循环数据
+    document.getElementById('cProtein').textContent = protein.toFixed(1) + ' g';
+    document.getElementById('cFat').textContent = fat.toFixed(1) + ' g';
+    document.getElementById('cCarbHigh').textContent = carb.toFixed(1) + ' g（100%）';
+    document.getElementById('cKcalHigh').textContent = Math.round(kcalHigh) + ' kcal';
+
+    document.getElementById('cProteinM').textContent = protein.toFixed(1) + ' g';
+    document.getElementById('cFatM').textContent = fat.toFixed(1) + ' g';
+    document.getElementById('cCarbMid').textContent = carbMid.toFixed(1) + ' g（≈60%）';
+    document.getElementById('cKcalMid').textContent = Math.round(kcalMid) + ' kcal';
+
+    document.getElementById('cProteinL').textContent = protein.toFixed(1) + ' g';
+    document.getElementById('cFatL').textContent = fat.toFixed(1) + ' g';
+    document.getElementById('cCarbLow').textContent = carbLow.toFixed(1) + ' g（≈30%）';
+    document.getElementById('cKcalLow').textContent = Math.round(kcalLow) + ' kcal';
+
+    // 两档循环数据
+    const carb2Low = carb * 0.35;
+    const kcal2High = kcalHigh;
+    const kcal2Low = protein * 4 + fat * 9 + carb2Low * 4;
+
+    document.getElementById('c2ProteinH').textContent = protein.toFixed(1) + ' g';
+    document.getElementById('c2FatH').textContent = fat.toFixed(1) + ' g';
+    document.getElementById('c2CarbH').textContent = carb.toFixed(1) + ' g（100%）';
+    document.getElementById('c2KcalH').textContent = Math.round(kcal2High) + ' kcal';
+
+    document.getElementById('c2ProteinL').textContent = protein.toFixed(1) + ' g';
+    document.getElementById('c2FatL').textContent = fat.toFixed(1) + ' g';
+    document.getElementById('c2CarbL').textContent = carb2Low.toFixed(1) + ' g（≈35%）';
+    document.getElementById('c2KcalL').textContent = Math.round(kcal2Low) + ' kcal';
+
+    // 公式显示
+    const genderText = currentGender === 'male' ? '男性' : '女性';
+    const genderSign = currentGender === 'male' ? '+5' : '-161';
+    document.getElementById('formulaBMR').innerHTML =
+        genderText + ': BMR = 10×' + weight + ' + 6.25×' + height + ' − 5×' + age + ' ' + genderSign +
+        '<br>= <strong>' + bmr.toFixed(1) + ' kcal</strong>';
+
+    // 生成参考食谱
+    generateSamplePlan(protein, fat, carb, carbLow);
+
+    // 显示所有结果卡片
+    document.querySelectorAll('.results').forEach(el => el.classList.add('show'));
+
+    // 滚动到结果
+    setTimeout(() => {
+        document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+// ===== 生成参考食谱 =====
+function generateSamplePlan(protein, fat, carbHigh, carbLow) {
+    const mealsPerDay = 5;
+    const ppMeal = protein / mealsPerDay;   // 每餐蛋白
+    const fpMeal = fat / mealsPerDay;       // 每餐脂肪
+    const cpMealHigh = carbHigh / mealsPerDay; // 高碳日每餐碳水
+    const cpMealLow = carbLow / mealsPerDay;   // 低碳日每餐碳水
+
+    // 高碳日食谱
+    const planHigh = [
+        { time: '早餐 🌅', food: `燕麦片${Math.round(cpMealHigh*0.35)}g + 鸡蛋2个 + 牛奶250ml`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal)}g C:${Math.round(cpMealHigh*0.35)}g` },
+        { time: '加餐 🍎', food: `蛋白粉30g + 香蕉1根`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal*0.5)}g C:${Math.round(cpMealHigh*0.2)}g` },
+        { time: '午餐 🍚', food: `米饭${Math.round(cpMealHigh*0.25)*4}g(熟) + 鸡胸肉${Math.round(ppMeal*4)}g + 蔬菜随意`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal)}g C:${Math.round(cpMealHigh*0.25)}g` },
+        { time: '训练前 💪', food: `红薯${Math.round(cpMealHigh*0.2)*3}g + 蛋白粉20g`, macro: `P:${Math.round(ppMeal*0.7)}g F:${Math.round(fpMeal*0.3)}g C:${Math.round(cpMealHigh*0.2)}g` },
+        { time: '训练后/晚餐 🌙', food: `米饭${Math.round(cpMealHigh*0.2)*4}g(熟) + 瘦肉/鱼${Math.round(ppMeal*4)}g + 蔬菜`, macro: `P:${Math.round(ppMeal*1.3)}g F:${Math.round(fpMeal*1.7)}g C:${Math.round(cpMealHigh*0.2)}g` }
+    ];
+
+    let htmlHigh = '';
+    planHigh.forEach(m => {
+        htmlHigh += `<div class="meal">
+            <div class="meal-time">${m.time}</div>
+            <div class="meal-food">${m.food}<div class="meal-macro"><span class="p">${m.macro}</span></div></div>
+        </div>`;
+    });
+    document.getElementById('samplePlanHigh').innerHTML =
+        '<p style="font-size:0.8em;color:#888;margin-bottom:8px;">高碳日（大肌群训练日）· 总热量 ≈ ' + Math.round(protein*4 + fat*9 + carbHigh*4) + ' kcal</p>' + htmlHigh;
+
+    // 低碳日食谱
+    const planLow = [
+        { time: '早餐 🌅', food: `鸡蛋3个 + 蔬菜沙拉 + 橄榄油少许`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal*1.5)}g C:${Math.round(cpMealLow*0.3)}g` },
+        { time: '加餐 🥜', food: `无糖酸奶200g + 坚果一小把`, macro: `P:${Math.round(ppMeal*0.6)}g F:${Math.round(fpMeal*1.5)}g C:${Math.round(cpMealLow*0.3)}g` },
+        { time: '午餐 🥗', food: `鸡胸肉/鱼肉${Math.round(ppMeal*4)}g + 大量绿叶蔬菜 + 少量薯类`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal)}g C:${Math.round(cpMealLow*0.3)}g` },
+        { time: '加餐 🥚', food: `蛋白粉20g + 鸡蛋1个`, macro: `P:${Math.round(ppMeal)}g F:${Math.round(fpMeal*0.5)}g C:${Math.round(cpMealLow*0.05)}g` },
+        { time: '晚餐 🌙', food: `瘦肉/鱼${Math.round(ppMeal*4)}g + 蔬菜为主 + 少量油脂`, macro: `P:${Math.round(ppMeal*1.4)}g F:${Math.round(fpMeal*1.5)}g C:${Math.round(cpMealLow*0.05)}g` }
+    ];
+
+    let htmlLow = '';
+    planLow.forEach(m => {
+        htmlLow += `<div class="meal">
+            <div class="meal-time">${m.time}</div>
+            <div class="meal-food">${m.food}<div class="meal-macro"><span class="p">${m.macro}</span></div></div>
+        </div>`;
+    });
+    document.getElementById('samplePlanLow').innerHTML =
+        '<p style="font-size:0.8em;color:#888;margin-bottom:8px;">低碳日（有氧/休息日）· 总热量 ≈ ' + Math.round(protein*4 + fat*9 + carbLow*4) + ' kcal</p>' + htmlLow;
+}
+
+// ===== 页面加载时默认计算一次 =====
+window.addEventListener('DOMContentLoaded', function() {
+    // 不自动计算，等待用户点击
+});
+</script>
+
+</body>
+</html>
